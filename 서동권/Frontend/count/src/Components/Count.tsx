@@ -1,29 +1,48 @@
 import axios from "axios";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
-const Count = () => {
+const Count: React.FC = () => {
+  // 상태 변수: count는 숫자 타입으로 선언
   const [count, setCount] = useState<number>(0);
 
-  const handleIncrease = () => {
-    // 서버에서 카운트 증가 처리
+  // 컴포넌트 마운트 시 카운트 값을 서버에서 가져옵니다.
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const response = await axios.get<number>(
+          "http://localhost:8080/api/count"
+        );
+        setCount(response.data);
+      } catch (error) {
+        console.error("There was an error fetching the count!", error);
+      }
+    };
+    fetchCount();
+  }, []);
 
-    // axios.post("http://localhost:8080/count", {
-    //   count: count + 1,
-    // });
-
-    setCount(count + 1);
+  // 카운트 증가 처리
+  const handleIncrease = async () => {
+    try {
+      const response = await axios.post<number>(
+        "http://localhost:8080/api/count/increment"
+      );
+      setCount(response.data);
+    } catch (error) {
+      console.error("There was an error incrementing the count!", error);
+    }
   };
 
-  const handleDecrease = () => {
-    // 서버에서 카운트 감소 처리
-
-    // axios.post("http://localhost:8080/count", {
-    //   count: count - 1,
-    // });
-
-    // 0보다 작은 수는 감소 못하게 막기
+  // 카운트 감소 처리
+  const handleDecrease = async () => {
     if (count > 0) {
-      setCount(count - 1);
+      try {
+        const response = await axios.post<number>(
+          "http://localhost:8080/api/count/decrement"
+        );
+        setCount(response.data);
+      } catch (error) {
+        console.error("There was an error decrementing the count!", error);
+      }
     }
   };
 

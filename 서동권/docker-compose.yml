@@ -1,1 +1,62 @@
-##  docker-compose.yml
+version: "3.8"
+
+services:
+  # MySQL 서비스
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: count
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+    networks:
+      - app_network
+
+  # React 애플리케이션 서비스
+  frontend:
+    build: ./Frontend/count
+    container_name: react-container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+    environment:
+      REACT_APP_API_URL: http://localhost:8080
+      # backend를 서비스 이름으로 설정
+
+  # Spring Boot 애플리케이션 서비스
+  backend:
+    build: ./Backend/demo
+    container_name: springboot-container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/count?serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+
+name: count-app

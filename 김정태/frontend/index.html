@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터 앱</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .counter {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>카운터</h1>
+        <div class="counter">{{ count }}</div>
+        <button @click="incrementCount">클릭</button>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    count: 0
+                }
+            },
+            mounted() {
+                this.getCount()
+            },
+            methods: {
+                async getCount() {
+                    try {
+                        const response = await axios.get('http://localhost:8000/count')
+                        this.count = response.data.count
+                    } catch (error) {
+                        console.error('Error fetching count:', error)
+                    }
+                },
+                async incrementCount() {
+                    try {
+                        const response = await axios.post('http://localhost:8000/increment')
+                        this.count = response.data.count
+                    } catch (error) {
+                        console.error('Error incrementing count:', error)
+                    }
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html> 

@@ -2,51 +2,44 @@ version: "3.8"
 
 services:
   db:
-    image: mysql:8.0
-    container_name: mysql_container
-    environment:
-      MYSQL_ROOT_PASSWORD: 1005
-      MYSQL_DATABASE: test
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 1005
-      MYSQL_ROOT_HOST: "%"
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     ports:
-      - "3306:3306"
+      - 3308:3306
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./db/db_data:/var/lib/mysql
     networks:
-      - app-network
-    # healthcheck:
-    #   test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-    #   interval: 10s
-    #   retries: 5
-    #   start_period: 30s
+      - container_network
 
   backend:
     build:
       context: ./backend
-    container_name: fastapi_backend
-    env_file:
-      - .env
+      dockerfile: Dockerfile
+    restart: always
     ports:
-      - "8000:8000"
+      - 8080:8080
     depends_on:
       - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/counter?useSSL=false&serverTimeZone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1005
     networks:
-      - app-network
+      - container_network
 
   frontend:
     build:
       context: ./frontend
-    container_name: react_frontend
+      dockerfile: Dockerfile
+    restart: always
     ports:
-      - "3000:3000"
+      - 3000:3000
+    depends_on:
+      - backend
     networks:
-      - app-network
-
-volumes:
-  mysql_data:
+      - container_network
 
 networks:
-  app-network:
-    driver: bridge
+  container_network:

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운터</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>카운터</h1>
+    <div class="counter-display">
+        <div class="label">현재 카운트</div>
+        <div class="count" th:text="${count}">0</div>
+    </div>
+
+    <form action="/increment" method="post">
+        <button type="submit" class="btn">클릭하여 카운트 증가</button>
+    </form>
+</div>
+</body>
+</html>
